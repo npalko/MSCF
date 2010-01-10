@@ -57,7 +57,7 @@ fplot(f, [0 .1]);
 
 f = @(y) 119.23 - bondprice(100,y,8,.05);
 y = fsolve(f, 0);
-fsolve(@(y) 119.23 - bondprice(100,y,8,.05));
+fsolve(@(y) 119.23 - bondprice(100,y,8,.05), 0);
 
 % formating
 
