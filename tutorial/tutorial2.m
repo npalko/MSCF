@@ -109,8 +109,8 @@ xlabel('Underlying Price');
 ylabel('Theoretical Value');
 legend('90','100','110','location','NorthWest');
 
-og = @(S,K) bs.call.gamma(S,K,0,.2,.05,60/260);
-fplot(@(S) [og(S,90) og(S,100) og(S,110)],[80 120]);
+cg = @(S,K) bs.call.gamma(S,K,0,.2,.05,60/260);
+fplot(@(S) [cg(S,90) cg(S,100) cg(S,110)],[80 120]);
 title('Figure 6-8: Call or Put Gamma vs. Underlying Price');
 xlabel('Underlying Price');
 ylabel('Gamma');
