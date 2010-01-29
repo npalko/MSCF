@@ -60,14 +60,9 @@ f3 = @(y) bondprice(100,y,10,.04);
 % object in MATLAB (like a matrix, string, cell array, etc). This 
 % allows us to ENCAPSULATE and RESUSE our hard work
 
-gbm = @(S,t) process.geometricbrownianmotion(S,t,.1,.8);
-ou = @(S,t) process.ornsteinuhlenbeck();
-
-montecarlo(gbm, 100, 100)
-
 % Plotting. Notice that FPLOT doesn't care what's going on inside the 
 % function passed to it. FPLOT simply provides an X coordinate, and 
-% recieves a Y back. 
+% recieves a Y back (ENCAPSULATION!). 
 
 fplot(@(x) sin(x),[1 10*pi]);
 f = @(x) sin(x);
@@ -136,6 +131,23 @@ dbclear all: clear all breakpoints
 
 
 %{
+SERIAL DATES
+
+The best way to work with dates in MATLAB. Extremely useful when plotting
+time series. Also see 
+
+    Financial Toolbox | Function Reference | Dates | Financial Dates
+
+%}
+
+today()
+m2xdate(today())
+datestr(today())
+datestr(today(), 'yyyy-mm-dd')
+datestr(now())
+datenum('12-25-1981')
+
+%{
 DOWNLOADING MARKET DATA
 
 %}
@@ -178,6 +190,10 @@ for i=1:nSecurity
    volume(:,i) = download.volume;
 end
 
+% notice that with our data already arranged in a certian way (each
+% column is a different security), MATLAB does the right thing
+% automatically
+
 plot(dates,close);
 datetick('x','mmm-yy');
 legend(portfolio.ticker);
@@ -205,16 +221,59 @@ be
 
 %}
 
+% calculate simple returns
+% (Vf-Vi)/Vi
+% notice that for time index 1 we have no returns defined, as we do not
+% have a price for time index 0.
+
+ret = NaN(size(close));
+ret(2:end,:) = (close(2:end,:) - close(1:end-1,:)) ./ close(1:end-1,:);
 
 % look at historical volitlity
 
+vol = NaN(size(ret));
+window = 20; % use a 20-day trailing volatility
 
-% calucalte returns
-% preform regression
+for i=window:size(ret,1)
+    vol(i,:) = nanstd(ret(i-window+1:i,:));
+end
+
+vol = vol * sqrt(260); % annualize daily observations
+
+%{
+TRADING SIMULATION
 
 
+%}
 
-% trade signals
-%
+% lets create some trade signals
+
+signal = rand(size(close));
+action = zeros(size(close));
+
+buySign = (signal > .15) & (signal < .20);
+sellSign = (signal > .75) & (signal < .80);
+
+action(buySign) = 1;
+action(sellSign) = -1;
+
+% simple cumsum example
+stairs(cumsum(double(action(:,1))));
+
+trade = action .* volume * .02; % only get as big as 2% volume
+
+
+% define position as end of day quantites
+
+qty = cumsum(trade);
+exposure = qty .* close;
+
+% pnl
+% (P(t) - P(t-1)) * Q(t)
+
+pnl = zeros(size(close));
+pnl(2:end,:) = (close(2:end,:) - close(1:end-1,:)) .* qty(2:end,:);
+
+plot(cumsum(sum(pnl,2)))
 
 
