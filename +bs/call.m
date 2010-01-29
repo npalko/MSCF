@@ -28,6 +28,13 @@ classdef call < handle
             d1 = bs.d1(S, K, t, vol, r, T);
             gamma = normpdf(d1) /(S * vol * (T-t));
         end
+        function volga = volga(S, K, t, vol, r, T)
+            
+            d1 = bs.d1(S, K, t, vol, r, T);
+            d2 = bs.d2(S, K, t, vol, r, T);
+            
+            volga = S*sqrt(T-t)*normpdf(d1)*d1*d2/vol;
+        end
     end
 end
 
