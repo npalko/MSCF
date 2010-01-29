@@ -277,3 +277,19 @@ pnl(2:end,:) = (close(2:end,:) - close(1:end-1,:)) .* qty(2:end,:);
 plot(cumsum(sum(pnl,2)))
 
 
+%{
+LINEAR REGRESSION AND PLOTTING
+
+%}
+
+
+xLim = [min(x) max(x)];
+[b bint r rint stats] = regress(y, [ones(size(x)) x]);
+[xRegress yRegress] = fplot(@(t) b(1) + b(2)*t, xLim);
+
+figure();
+line(x, y, 'Parent', gca(),'Marker','.','Line','None'); % scatter
+line(xRegress, yRegress, 'Parent', gca(), 'Color', 'red'); % line
+    
+    
+
