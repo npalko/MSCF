@@ -258,13 +258,12 @@ action(buySign) = 1;
 action(sellSign) = -1;
 
 % simple cumsum example
-stairs(cumsum(double(action(:,1))));
+stairs(cumsum(action(:,1)));
 
-trade = action .* volume * .02; % only get as big as 2% volume
-
+% only get as big as 2% volume
+trade = action .* volume * .02; 
 
 % define position as end of day quantites
-
 qty = cumsum(trade);
 exposure = qty .* close;
 
@@ -275,7 +274,6 @@ pnl = zeros(size(close));
 pnl(2:end,:) = (close(2:end,:) - close(1:end-1,:)) .* qty(2:end,:);
 
 plot(cumsum(sum(pnl,2)))
-
 
 %{
 LINEAR REGRESSION AND PLOTTING
