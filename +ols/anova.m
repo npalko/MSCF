@@ -1,5 +1,6 @@
 function anova(f)
-
+    % print analysis of variance
+    
 
 
     fprintf('\r')
@@ -11,13 +12,13 @@ function anova(f)
     fprintf('\r')
 
     fprintf('%6s','Regr');
-    fprintf('%10.4f',f.dfr,f.ssr,f.ssr/f.dfr,f.f,f.pval);
+    fprintf('%10.4f', f.dfr, f.ssr, f.ssr/f.dfr, f.f, f.pval);
     fprintf('\r')
 
     fprintf('%6s','Resid');
-    fprintf('%10.4f',f.dfe,f.sse,f.sse/f.dfe);
+    fprintf('%10.4f',f.dfe ,f.sse, f.sse/f.dfe);
     fprintf('\r')
 
     fprintf('%6s','Total');
-    fprintf('%10.4f',f.dfe+f.dfr,f.sse+f.ssr);
+    fprintf('%10.4f', f.dfe+f.dfr, f.sse+f.ssr);
     fprintf('\r')
