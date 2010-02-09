@@ -27,7 +27,14 @@ classdef ols < handle
                  [fields num2cell([t.beta t.se t.t t.pval])] 
                ];
        end
-       function simultci(X, stats)
+       function ci = simultci(X, stats)
+ 
+           % use wald statistic
+           % scheffe method
+           % pg 41 notes
+           
+           X = [ones(size(X,1),1) X];
+           
            
            alpha = .05; 
            p = stats.fstat.dfr + 1;     % p: number of coefficients in the 
@@ -35,19 +42,12 @@ classdef ols < handle
                                         %    intercept
            n = stats.fstat.dfe + p;     % n: total number of x data points
            
-           RSS = stats.fstat.see;
-           sigma = sqrt(RSS/(n-p));
-           
-           se = sigma * sqrt((X'*X)^-1);
-           % get diagonals
-           
-           % use wald statistic
-           % scheffe method
-           % pg 41 notes
+           RSS = stats.fstat.sse;
+           sigma = sqrt(RSS/(n-p));  
+           se = sigma * diag(sqrt((X'*X)^-1));
+   
            multiplier = sqrt(p*icdf('F', 1-alpha, p, n-p));
-           
-           
-           
+           ci = multiplier .* se;
            
        end
        function anova()
