@@ -1,5 +1,5 @@
 classdef ols < handle
-   methods (Static)
+   methods (Static) % pretty printing
        function printBasicSummary(stats)
            % print R^2, F, p-val
            
@@ -10,29 +10,69 @@ classdef ols < handle
            % p-val: null hypothesis that explaintory variables are jointly
            %        of no use explaining obvservations
            
-           fprintf('R^2 = %f\rF = %f\rp-val = %f\r', ...
-               stats.rsquare, stats.fstat.f, stats.fstat.pval);
+           fprintf('R^{2} = %10.6f\r', stats.rsquare);
+           fprintf('F     = %10.6f\r', stats.fstat.f);
+           fprintf('p-val = %10.6f\r', stats.fstat.pval);
        end
-       function ci = independentci(stats)
+       function printExplanitorySummmary(stats, fields)
+           
+           % t:     test of whether the slope of a regression line differs
+           %        significantly from 0
+           % p-val: if it is below the statistical significant level (eg.
+           %        0.05, 0.01), then the null hypothesis is rejected in
+           %        favor of the alternate hypothesis
+           
+           t = stats.tstat;
+           fields = [{'(Intercept)'} fields]';
+           
+           if nargout == 0
+               fprintf('%14s %10s %10s %10s %10s\r', ...
+                   '','Value','Std Error','t value', 'p-value');
+               for i=1:numel(fields)
+                   fprintf('%14s %10.4f %10.4f %10.4f %10.4f\r', ...
+                       fields{i}, t.beta(i), t.se(i), t.t(i), t.pval(i));
+               end
+           end  
+       end
+       function printci(fields, beta, ci)
+           % print confidence interval
+           
+           for i=1:numel(fields)
+               fprintf('%14s = %10.4f, [%10.4f,%10.4f]\r', ...
+                   fields{i}, beta(i), ci(i,1), ci(i,2));
+           end
+       end
+   end
+   methods (Static) % confidence intervals
+       function ci = independentci(stats, alpha)
            % return the independent CI for beta (this is provided by the
            % regress() function, but not readily available 
            
-           alpha = 0.05;
+           if nargin == 1
+               alpha = 0.05;
+           end
            
            beta = stats.beta;
            se = stats.tstat.se;
            dfe = stats.tstat.dfe;
            
            tval = tinv((1-alpha/2), dfe);
-           ci = [beta-tval*se beta+tval*se];
+           d = tval*se;
+           
+           ci = [beta-d beta+d];
        end
-       function ci = simultci(X, stats)
+       function ci = simultci(X, stats, alpha, p)
            % use wald statistic
            % scheffe method
            % pg 41 notes
            
-           alpha = .05; 
-           p = stats.fstat.dfr + 1;     % p: number of coefficients in the 
+           if nargin == 2
+               alpha = 0.05;
+               p = stats.fstat.dfr + 1;
+           end
+           
+           
+                                        % p: number of coefficients in the 
                                         %    model, including the 
                                         %    intercept
            n = stats.fstat.dfe + p;     % n: total number of x data points
@@ -48,63 +88,8 @@ classdef ols < handle
            
            ci = [beta-d beta+d];
        end 
-       function printci(fields, beta, ci)
-           % print confidence interval
-           
-           for i=1:numel(fields)
-               fprintf('%s = %f, [%f,%f]\r', ...
-                   fields{i}, beta(i), ci(i,1), ci(i,2));
-           end
-       end
-       function s = explanitorySummmary(stats, fields)
-           % return cell array of factor summary
-           
-           % t:     test of whether the slope of a regression line differs
-           %        significantly from 0
-           % p-val: if it is below the statistical significant level (eg.
-           %        0.05, 0.01), then the null hypothesis is rejected in
-           %        favor of the alternate hypothesis
-           
-           t = stats.tstat;
-           fields = [{'(Intercept)'} fields]';
-           
-           s = [ {[],'Value', 'Std Error', 't value', 'p-val'}
-                 [fields num2cell([t.beta t.se t.t t.pval])] 
-               ];
-           
-           
-           if nargout == 0
-               fprintf('%14s %10s %10s %10s %10s\r', ...
-                   '','Value','Std Error','t value', 'p-value');
-               for i=1:numel(fields)
-                   fprintf('%14s %10.4f %10.4f %10.4f %10.4f\r', ...
-                       fields{i}, t.beta(i), t.se(i), t.t(i), t.pval(i));
-               end
-           end  
-       end
-
-       function anova()
-           
-           fprintf('\r')
-           fprintf('Regression ANOVA');
-           fprintf('\r\r')
-
-           fprintf('%6s','Source');
-           fprintf('%10s','df','SS','MS','F','P');
-           fprintf('\r')
-
-           fprintf('%6s','Regr');
-           fprintf('%10.4f', f.dfr, f.ssr, f.ssr/f.dfr, f.f, f.pval);
-           fprintf('\r')
-
-           fprintf('%6s','Resid');
-           fprintf('%10.4f',f.dfe ,f.sse, f.sse/f.dfe);
-           fprintf('\r')
-           fprintf('%6s','Total');
-           fprintf('%10.4f', f.dfe+f.dfr, f.sse+f.ssr);
-           fprintf('\r')
-    
-       end
+   end
+   methods (Static) % diagnostics
        function diagnose()
 
            % Durbin-Watson statistic
