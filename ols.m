@@ -65,28 +65,30 @@ classdef ols < handle
            % use wald statistic
            % scheffe method
            % pg 41 notes
+
+           % p: number of coefficients in the model, including the 
+           % intercept. If we preform a 4 \beta regression, but require
+           % only 2 simultaneous measurements, we would set p=2 here.
+           
            
            if nargin == 2
+               % defaults
+               
                alpha = 0.05;
                p = stats.fstat.dfr + 1;
            end
            
-           
-                                        % p: number of coefficients in the 
-                                        %    model, including the 
-                                        %    intercept
-           n = stats.fstat.dfe + p;     % n: total number of x data points
-           beta = stats.beta;
-           
+           n = size(X,1);       % n: total number of x data points
+           X = [ones(n,1) X];   % X does not include ones by default
+           betaHat = stats.beta;
            RSS = stats.fstat.sse;
+           
            sigmaHat = sqrt(RSS/(n-p));  
-           X = [ones(size(X,1),1) X]; % X does not include ones by default
            se = sigmaHat * diag(sqrt((X'*X)^-1));
-   
            multiplier = sqrt(p*icdf('F', 1-alpha, p, n-p));
            d = multiplier .* se;
            
-           ci = [beta-d beta+d];
+           ci = [betaHat-d betaHat+d];
        end 
    end
    methods (Static) % diagnostics
