@@ -92,6 +92,18 @@ classdef ols < handle
        end 
    end
    methods (Static) % diagnostics
+       function ms = modelSelection(reducedModelStats, fullModelStats)
+           % model1: reduced model
+           % model2: full model
+           
+           RSS1 = reducedModelStats.fstat.sse;
+           RSS2 = fullModelStats.fstat.sse;
+           df1 = reducedModelStats.fstat.dfe;
+           df2 = fullModelStats.fstat.dfe;
+           
+           ms.fstat = ((RSS1-RSS2)/(df1-df2)) * (df2/RSS2);
+           ms.pvalue = 1 - fcdf(ms.fstat, df1-df2, df2);
+       end
        function diagnose()
 
            % Durbin-Watson statistic
