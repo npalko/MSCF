@@ -14,7 +14,7 @@ classdef ols < handle
            fprintf('F     = %10.6f\r', stats.fstat.f);
            fprintf('p-val = %10.6f\r', stats.fstat.pval);
        end
-       function printExplanitorySummmary(stats, fields)
+       function printExplanitorySummary(stats, fields)
            
            % t:     test of whether the slope of a regression line differs
            %        significantly from 0
