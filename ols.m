@@ -43,6 +43,29 @@ classdef ols < handle
            end
        end
    end
+   methods (Static)
+       % takes regstats stats output
+       function aic = AIC(X, y, stats)
+           m = size(X, 2)+1;  % number of covariates
+           n = size(y, 1);  % number of observations
+           
+           r = y - [ones(n,1) X] * stats.beta;
+           RSS = r' * r;    % RSS
+           
+           aic = n * (log(2*pi) + 1) + n*log(RSS/n) + 2*m;
+       end
+       
+       % takes regstats stats output
+       function bic = BIC(X, y, stats)
+           m = size(X, 2)+1;  % number of covariates
+           n = size(y, 1);  % number of observations
+           
+           r = y - [ones(n,1) X] * stats.beta;
+           RSS = r' * r;    % RSS
+           
+           bic = n * (log(2*pi) + 1) + n*log(RSS/n) + log(n)*m;
+       end
+   end
    methods (Static) % confidence intervals
        function ci = independentci(stats, alpha)
            % return the independent CI for beta (this is provided by the
