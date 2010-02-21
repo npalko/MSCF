@@ -39,4 +39,27 @@ classdef l1 < handle
            end
        end
    end
+   methods (Static)
+       % takes regstats stats output
+       function aic = AIC(X, y, beta)
+           m = size(X, 2)+1;  % number of covariates
+           n = size(y, 1);  % number of observations
+           
+           r = y - [ones(n,1) X] * beta;
+           RSA = sum(abs(r));    % sum of absolute residuals
+           
+           aic = 2*n * (log(2*RSA/n) + 1) + 2*m;
+       end
+       
+       % takes regstats stats output
+       function bic = BIC(X, y, beta)
+           m = size(X, 2)+1;  % number of covariates
+           n = size(y, 1);  % number of observations
+           
+           r = y - [ones(n,1) X] * beta;
+           RSA = sum(abs(r));    % sum of absolute residuals
+           
+           bic = 2*n * (log(2*RSA/n) + 1) + m*log(n);
+       end
+   end
 end
