@@ -7,23 +7,25 @@ classdef student < handle
            
            % if x ~ t location, scale distribution with df 
            % degrees of freedom, then (x-u)/sigma ~ t(df)
-           m = @(s) 1 / sum(log(tpdf(r ./ s, df)));
+           f = @(s) -sum(log(tpdf(r ./ s, df)));
            
-           s = fminunc(m, (r'*r)/n);
+           s = fminunc(f, (r'*r)/n);
        end
 
        function B = regress(X,Y,df) 
            [n,m] = size(X);
-           xWithConst = [ones(n,1) X];
 
-           bInit = xWithConst\ Y;
+           bInit = ones(m, 1);
            
-           r = (Y - xWithConst*bInit);
+           r = (Y - X*bInit);
            s = student.findLonS(r, df);
-           
-           f = @(b) 1 / sum(log(tpdf((Y - xWithConst*b) ./ s, df)));
 
-           B = fminunc(f, bInit); 
+           % if x ~ t location, scale distribution with df 
+           % degrees of freedom, then (x-u)/sigma ~ t(df)
+           f = @(b) -sum(log(tpdf((Y - X*b) ./ s, df)));
+           
+           options = optimset('MaxFunEvals', 10000, 'TolX', 1e-16, 'TolFun', 1e-16);
+           [B, fval] = fminunc(f, bInit, options); 
        end
    end
 end
