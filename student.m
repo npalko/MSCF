@@ -27,7 +27,7 @@ classdef student < handle
        end
 
        % X should contain the intercept vector of 1s
-       function B = regress(X,Y,df) 
+       function [B, s] = regress(X,Y,df) 
            [n,m] = size(X);
            
            bInit = X\ Y;
@@ -43,6 +43,7 @@ classdef student < handle
                            
            [B, fval] = fminunc(fHandle, bInit, options); 
            B = B(1:end-1);
+           s = B(end);
        end
    end
 end
