@@ -45,14 +45,18 @@ classdef ols < handle
    end
    methods (Static)
        % takes regstats stats output
-       function aic = AIC(X, y, stats)
+       function aic = AIC(X, y, stats, weights)
            m = size(X, 2)+1;  % number of covariates
            n = size(y, 1);  % number of observations
            
-           r = y - [ones(n,1) X] * stats.beta;
-           RSS = r' * r;    % RSS
+           if(nargin == 3)
+               weights = ones(n,1);
+           end
            
-           aic = n * (log(2*pi) + 1) + n*log(RSS/n) + 2*m;
+           r = y - [ones(n,1) X] * stats.beta;
+           RSS = r' * (r .* weights);    % RSS
+           
+           aic = n * (log(2*pi) + 1) + n*log(RSS/n) + 2*m - sum(log(weights));
        end
        
        % takes regstats stats output
@@ -60,30 +64,12 @@ classdef ols < handle
            m = size(X, 2)+1;  % number of covariates
            n = size(y, 1);  % number of observations
            
-           r = y - [ones(n,1) X] * stats.beta;
-           RSS = r' * r;    % RSS
-           
-           bic = n * (log(2*pi) + 1) + n*log(RSS/n) + log(n)*m;
-       end
-       
-       % takes regstats stats output
-       function aic = wAIC(X, y, stats, weights)
-           m = size(X, 2)+1;  % number of covariates
-           n = size(y, 1);  % number of observations
+           if(nargin == 3)
+               weights = ones(n,1);
+           end
            
            r = y - [ones(n,1) X] * stats.beta;
-           RSS = r' * r;    % RSS
-           
-           aic = n * (log(2*pi) + 1) + n*log(RSS/n) + 2*m - sum(log(weights));
-       end
-       
-       % takes regstats stats output
-       function bic = wBIC(X, y, stats, weights)
-           m = size(X, 2)+1;  % number of covariates
-           n = size(y, 1);  % number of observations
-           
-           r = y - [ones(n,1) X] * stats.beta;
-           RSS = r' * r;    % RSS
+           RSS = r' * (r .* weights);    % RSS
            
            bic = n * (log(2*pi) + 1) + n*log(RSS/n) + log(n)*m - sum(log(weights));
        end
