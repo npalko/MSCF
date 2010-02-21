@@ -60,7 +60,7 @@ classdef ols < handle
        end
        
        % takes regstats stats output
-       function bic = BIC(X, y, stats)
+       function bic = BIC(X, y, stats, weights)
            m = size(X, 2)+1;  % number of covariates
            n = size(y, 1);  % number of observations
            
