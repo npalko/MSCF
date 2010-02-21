@@ -46,4 +46,29 @@ classdef student < handle
            s = B(end);
        end
    end
+   methods (Static)
+       % takes regstats stats output
+       function aic = AIC(X, y, beta, sigma, df)
+           [n,m] = size(X);
+           r = y - [ones(n,1) X]*beta;
+           
+           
+           llh_1 = n*(gamma((df+1)/2)/(sigma*sqrt(df*pi)*gamma(df/2)));
+           llh_2 = -((df+1)/2)*sum(log(1 + ((r ./ sigma) .^ 2) ./ df));
+           
+           aic = -2*(llh_1 + llh_2) + 2*(m+1);
+       end
+       
+       % takes regstats stats output
+       function bic = BIC(X, y, beta, sigma, df)
+           [n,m] = size(X);
+           r = y - [ones(n,1) X]*beta;
+           
+           
+           llh_1 = n*(gamma((df+1)/2)/(sigma*sqrt(df*pi)*gamma(df/2)));
+           llh_2 = -((df+1)/2)*sum(log(1 + ((r ./ sigma) .^ 2) ./ df));
+           
+           bic = -2*(llh_1 + llh_2) + (m+1)*log(n);
+       end
+   end
 end
