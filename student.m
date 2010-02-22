@@ -100,19 +100,17 @@ classdef student < handle
        
        % takes regstats stats output
        function aic = AIC(stats)
-           m = length(stats.beta);
            
            llh = student.LLH(stats.r,stats.sigmaHat,stats.df);
-           aic = -2*llh + 2*(m+1);
+           aic = -2*llh + 2*(stats.m+1);
        end
        
        % takes regstats stats output
        function bic = BIC(stats)
            n = length(stats.r);
-           m = length(stats.beta);
            
            llh = student.LLH(stats.r,stats.sigmaHat,stats.df);
-           bic = -2*llh + (m+1)*log(n);
+           bic = -2*llh + (stats.m+1)*log(n);
        end
    end
 end
