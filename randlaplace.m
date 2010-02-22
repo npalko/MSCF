@@ -1,4 +1,4 @@
-function function x = randlaplace(siz,lambda)
+function x = randlaplace(siz,lambda)
     % RANDL  random numbers distributed according to the Laplace distribution
     %   RANDL(N) will return an NxN matrix containing pseudo-random values
     %   drawn from a Laplace distribution with zero mean and standard deviation
