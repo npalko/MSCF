@@ -1,6 +1,5 @@
 classdef student < handle
-   methods (Static)
-               
+   methods (Static)     
        % Solve for the gradient vector
        function gr = gradient(X,Y,B,sigma,df)
           [n,m] = size(X);
@@ -18,8 +17,9 @@ classdef student < handle
           gr = [(df+1)*sum(z,1) sder];
        end
        
-       function l = LLH(X,Y,B,s,df)
-           r = Y - X*B;
+       function l = LLH(r,s,df)
+           n = length(r);
+
            adjusted_residuals = (r ./ s) .^ 2;
            
            a = (df+1)/2;
@@ -35,46 +35,84 @@ classdef student < handle
            beta = B(1:end-1);
            sigma = abs(B(end));
            
-           l = -student.LLH(X, Y, beta, sigma, df);
+           r = Y - X*beta;
+           
+           l = -student.LLH(r, sigma, df);
            g = -student.gradient(X, Y, beta, sigma, df);
        end
 
        % X should contain the intercept vector of 1s
-       function [beta, sigma] = regress(X,Y,df) 
-           X1 = [ones(length(Y)) X];
+       function stats = regstats(y, X, df) 
+           X1 = [ones(length(y),1) X];
            [n,m] = size(X1);
            
-           bInit = X1\ Y;
-           r = Y - X1*bInit;
+           bInit = X1\ y;
+           r = y - X1*bInit;
            
            bInit = [bInit; sqrt(mean(r .^ 2))];
 
-           fHandle = @(b) student.solveLLH(X1,Y,b,df);
+           fHandle = @(b) student.solveLLH(X1,y,b,df);
            
            options = optimset('MaxFunEvals', 10000, 'TolX', 1e-15, ...
                               'TolFun', 1e-15, 'GradObj', 'on', ...
-                              'MaxIter', 10000, 'Display', 'on');
+                              'MaxIter', 10000, 'Display', 'off');
                            
            [B, fval] = fminunc(fHandle, bInit, options); 
-           beta = B(1:end-1);
-           sigma = abs(B(end));
-       end
-   end
-   methods (Static)
-       % takes regstats stats output
-       function aic = AIC(X, y, beta, sigma, df)
-           [n,m] = size(X);
            
-           l = student.LLH(X,Y,B,sigma,df);
-           aic = -2*l + 2*(m+2);
+           stats.beta = B(1:end-1);
+           stats.r = y - X1*stats.beta;
+           stats.sigmaHat = abs(B(end));
+           stats.m = m;
+           stats.df = df;
+       end
+       
+       function ci = confidenceIntervals(stats, X, alpha, n)
+           
+           if nargin == 2 
+               alpha = .05;
+               n = 100;
+           elseif nargin == 3 
+               n = 100;
+           end
+           
+           m = length(stats.beta);
+           X1 = [ones(size(X,1),1) X];
+       
+           bSim = zeros(m, n);
+           
+           yBase = X1*stats.beta;
+           
+           for i=1:n
+               ytSim = yBase + stats.sigmaHat*trnd(stats.df, [length(stats.r) 1]);
+               simStats = student.regstats(ytSim, X, stats.df);
+        
+               bSim(:,i) = simStats.beta;
+           end
+           
+           simtCov = cov(bSim');
+           ses = sqrt(diag(simtCov));
+           
+           ltbCI = stats.beta - ses * norminv(1-alpha,0,1);
+           rtbCI = stats.beta + ses * norminv(1-alpha,0,1);
+           
+           ci = [ltbCI rtbCI];
        end
        
        % takes regstats stats output
-       function bic = BIC(X, y, beta, sigma, df)
-           [n,m] = size(X);
+       function aic = AIC(stats)
+           m = length(stats.beta);
            
-           l = student.LLH(X,Y,B,sigma,df);
-           bic = -2*l + (m+2)*log(n);
+           llh = student.LLH(stats.r,stats.sigmaHat,stats.df);
+           aic = -2*llh + 2*(m+1);
+       end
+       
+       % takes regstats stats output
+       function bic = BIC(stats)
+           n = length(stats.r);
+           m = length(stats.beta);
+           
+           llh = student.LLH(stats.r,stats.sigmaHat,stats.df);
+           bic = -2*llh + (m+1)*log(n);
        end
    end
 end
