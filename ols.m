@@ -45,33 +45,31 @@ classdef ols < handle
    end
    methods (Static)
        % takes regstats stats output
-       function aic = AIC(X, y, stats, weights)
-           m = size(X, 2)+1;  % number of covariates
-           n = size(y, 1);  % number of observations
+       function aic = AIC(stats, weights)
+           m = length(stats.beta);  % number of covariates
+           n = length(stats.r);  % number of observations
            
            if(nargin == 3)
                weights = ones(n,1);
            end
            
-           r = y - [ones(n,1) X] * stats.beta;
-           RSS = r' * (r .* weights);    % RSS
+           RSS = stats.r' * (stats.r .* weights);    % RSS
            
-           aic = n * (log(2*pi) + 1) + n*log(RSS/n) + 2*m - sum(log(weights));
+           aic = n * (log(2*pi) + 1) + n*log(RSS/n) + 2*(m+1) - sum(log(weights));
        end
        
        % takes regstats stats output
-       function bic = BIC(X, y, stats, weights)
-           m = size(X, 2)+1;  % number of covariates
-           n = size(y, 1);  % number of observations
+       function bic = BIC(stats, weights)
+           m = length(stats.beta);  % number of covariates
+           n = length(stats.r);  % number of observations
            
            if(nargin == 3)
                weights = ones(n,1);
            end
            
-           r = y - [ones(n,1) X] * stats.beta;
-           RSS = r' * (r .* weights);    % RSS
+           RSS = stats.r' * (stats.r .* weights);    % RSS
            
-           bic = n * (log(2*pi) + 1) + n*log(RSS/n) + log(n)*m - sum(log(weights));
+           bic = n * (log(2*pi) + 1) + n*log(RSS/n) + log(n)*(m+1) - sum(log(weights));
        end
    end
    methods (Static) % confidence intervals
