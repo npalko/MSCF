@@ -1,5 +1,6 @@
 function stats = glm2regstatsAdapter(glm)
-    % transform
+    % transform the output of GLM fit to match that of REGSTATS. not all 
+    % variables are transformed.
     
     
     stats.beta = glm.beta;
