@@ -22,7 +22,7 @@ classdef student < handle
        function [s, g] = LLH(X,Y,B,df)
            r = Y - X*B(1:end-1);
            
-           s = -sum(log(tpdf(r ./ B(end), df)));
+           s = -sum(log(tpdf(r ./ abs(B(end)), df)));
            g = -student.gradient(X,Y,B,df);
        end
 
@@ -43,7 +43,7 @@ classdef student < handle
                            
            [B, fval] = fminunc(fHandle, bInit, options); 
            B = B(1:end-1);
-           s = B(end);
+           s = abs(B(end));
        end
    end
    methods (Static)
@@ -54,8 +54,11 @@ classdef student < handle
            
            adjusted_residuals = ((r ./ sigma) .^ 2) ./ df;
            
-           llh_1 = n*log(gamma((df+1)/2)/(sigma*sqrt(df*pi)*gamma(df/2)));
-           llh_2 = -((df+1)/2) * sum(log(1 + adjusted_residuals));
+           a = (df+1)/2;
+           numer = gamma(a);
+           denom = sigma*sqrt(df*pi)*gamma(df/2);
+           llh_1 = n*log(numer/denom);
+           llh_2 = -a * sum(log(1 + adjusted_residuals));
            
            aic = -2*(llh_1 + llh_2) + 2*(m+1);
        end
@@ -67,8 +70,11 @@ classdef student < handle
            
            adjusted_residuals = ((r ./ sigma) .^ 2) ./ df;
            
-           llh_1 = n*log(gamma((df+1)/2)/(sigma*sqrt(df*pi)*gamma(df/2)));
-           llh_2 = -((df+1)/2) * sum(log(1 + adjusted_residuals));
+           a = (df+1)/2;
+           numer = gamma(a);
+           denom = sigma*sqrt(df*pi)*gamma(df/2);
+           llh_1 = n*log(numer/denom);
+           llh_2 = -a * sum(log(1 + adjusted_residuals));
            
            bic = -2*(llh_1 + llh_2) + (m+1)*log(n);
        end
