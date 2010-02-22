@@ -28,18 +28,20 @@ classdef student < handle
 
        % X should contain the intercept vector of 1s
        function [B, s] = regress(X,Y,df) 
-           [n,m] = size(X);
+           X1 = [ones(length(Y)) X];
+           [n,m] = size(X1);
            
-           bInit = X\ Y;
-           r = Y - X*bInit;
+          
+           bInit = X1\ Y;
+           r = Y - X1*bInit;
            
            bInit = [bInit; sqrt(mean(r .^ 2))];
 
-           fHandle = @(b) student.LLH(X,Y,b,df);
+           fHandle = @(b) student.LLH(X1,Y,b,df);
            
            options = optimset('MaxFunEvals', 10000, 'TolX', 1e-16, ...
                               'TolFun', 1e-16, 'GradObj', 'on', ...
-                               'MaxIter', 10000);
+                               'MaxIter', 10000, 'Display', 'off');
                            
            [B, fval] = fminunc(fHandle, bInit, options); 
            B = B(1:end-1);
@@ -52,15 +54,16 @@ classdef student < handle
            [n,m] = size(X);
            r = y - [ones(n,1) X]*beta;
            
-           adjusted_residuals = ((r ./ sigma) .^ 2) ./ df;
+           r = r ./ sigma;
+           adjusted_residuals = (r .^ 2) ./ df;
            
            a = (df+1)/2;
            numer = gamma(a);
-           denom = sigma*sqrt(df*pi)*gamma(df/2);
+           denom = sqrt(df*pi)*gamma(df/2);
            llh_1 = n*log(numer/denom);
            llh_2 = -a * sum(log(1 + adjusted_residuals));
            
-           aic = -2*(llh_1 + llh_2) + 2*(m+1);
+           aic = -2*(llh_1 + llh_2) + 2*(m+2);
        end
        
        % takes regstats stats output
@@ -68,15 +71,16 @@ classdef student < handle
            [n,m] = size(X);
            r = y - [ones(n,1) X]*beta;
            
-           adjusted_residuals = ((r ./ sigma) .^ 2) ./ df;
+           r = r ./ sigma;
+           adjusted_residuals = (r .^ 2) ./ df;
            
            a = (df+1)/2;
            numer = gamma(a);
-           denom = sigma*sqrt(df*pi)*gamma(df/2);
+           denom = sqrt(df*pi)*gamma(df/2);
            llh_1 = n*log(numer/denom);
            llh_2 = -a * sum(log(1 + adjusted_residuals));
            
-           bic = -2*(llh_1 + llh_2) + (m+1)*log(n);
+           bic = -2*(llh_1 + llh_2) + (m+2)*log(n);
        end
    end
 end
