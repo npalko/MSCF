@@ -20,15 +20,13 @@ classdef student < handle
        
        function l = LLH(X,Y,B,s,df)
            r = Y - X*B;
-           adjusted_residuals = r ./ s;
+           adjusted_residuals = (r ./ s) .^ 2;
            
            a = (df+1)/2;
            numer = gamma(a);
            denom = sqrt(df*pi)*gamma(df/2);
-           llh_1 = n*log(numer/denom);
-           llh_2 = -a * sum(log(1 + adjusted_residuals));
        
-           l = llh_1 + llh_2;
+           l = n*log(numer/denom) -a * sum(log(1 + adjusted_residuals));
        end
            
        % Find the sigma that maximizes the Log Liklihood function given a B
@@ -37,7 +35,7 @@ classdef student < handle
            beta = B(1:end-1);
            sigma = abs(B(end));
            
-           l = student.LLH(X, Y, beta, sigma, df);
+           l = -student.LLH(X, Y, beta, sigma, df);
            g = -student.gradient(X, Y, beta, sigma, df);
        end
 
