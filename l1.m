@@ -28,6 +28,31 @@ classdef l1 < handle
             stats.m = size(X,2) + 1; % numer of covariates (includes intercept!)
             stats.sigmaHat = sum(abs(stats.r))/numel(stats.r);
         end
+        function ci = confidenceIntervals(stats, X, alpha, n)
+            
+            if nargin == 2
+                alpha = .05;
+                n = 100;
+            elseif nargin == 3
+                n = 100;
+            end
+            
+            X1 = [ones(size(stats.r)) X];
+            [l,m] = size(X1);
+            
+            bSim = zeros(m, n);
+            for i=1:n
+                ytSim = X1*stats.beta + randlaplace(size(stats.r), 1/stats.sigmaHat);
+                tmpStats = l1.regstats(ytSim, X);
+                bSim(:,i) = tmpStats.beta;
+            end
+            simtCov = cov(bSim');
+            ses = sqrt(diag(simtCov));
+            llbCI = stats.beta - ses * norminv(1-alpha,0,1);
+            rlbCI = stats.beta + ses * norminv(1-alpha,0,1);
+            
+            ci = [llbCI rlbCI];
+        end
         function aic = AIC(stats)
             n = numel(stats.r);  % number of observations     
             aic = 2*n * (log(2*stats.sigmaHat) + 1) + 2*stats.m;
