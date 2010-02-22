@@ -20,7 +20,7 @@ classdef student < handle
        function l = LLH(r,s,df)
            n = length(r);
 
-           adjusted_residuals = (r / s) .^ 2;
+           adjusted_residuals = ((r ./ s) .^ 2) ./ df;
            
            a = (df+1)/2;
            numer = gamma(a);
@@ -82,7 +82,8 @@ classdef student < handle
            yBase = X1*stats.beta;
            
            for i=1:n
-               ytSim = yBase + stats.sigmaHat*trnd(stats.df, [length(stats.r) 1]);
+               ytSim = yBase + stats.sigmaHat * ...
+                                      trnd(stats.df, [length(stats.r) 1]);
                simStats = student.regstats(ytSim, X, stats.df);
         
                bSim(:,i) = simStats.beta;
