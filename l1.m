@@ -55,11 +55,11 @@ classdef l1 < handle
         end
         function aic = AIC(stats)
             n = numel(stats.r);  % number of observations     
-            aic = 2*n * (log(2*stats.sigmaHat) + 1) + 2*stats.m;
+            aic = 2*n * (log(2*stats.sigmaHat) + 1) + 2*(stats.m+1);
         end
         function bic = BIC(stats)
             n = numel(stats.r); % number of observations     
-            bic = 2*n * (log(2*stats.sigmaHat) + 1) + stats.m*log(n);
+            bic = 2*n * (log(2*stats.sigmaHat) + 1) + (stats.m+1)*log(n);
        end
    end
 end
