@@ -20,13 +20,13 @@ classdef l1 < handle
                W = sqrt(1 ./ max(abs((BOld(1) + (X * BOld(2:end))) - y),1e-6)); 
                % Floor to avoid division by zero 
                % Calculate new coefficients 
-               B = (repmat(W,[1 m+1]) .* [ones(n,1) X]) \ (W .* yY); 
+               B = (repmat(W,[1 m+1]) .* [ones(n,1) X]) \ (W .* y); 
             end
             
             stats.beta = B;
             stats.r = y - [ones(n,1) X] * stats.beta;   % residuals
             stats.m = size(X,2) + 1; % numer of covariates (includes intercept!)
-            stats.sigmaHat = stats.RSA/numel(stats.r);
+            stats.sigmaHat = sum(abs(stats.r))/numel(stats.r);
         end
         function aic = AIC(stats)
             n = numel(stats.r);  % number of observations     
