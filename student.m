@@ -20,13 +20,13 @@ classdef student < handle
        function l = LLH(r,s,df)
            n = length(r);
 
-           adjusted_residuals = (r ./ s) .^ 2;
+           adjusted_residuals = (r / s) .^ 2;
            
            a = (df+1)/2;
            numer = gamma(a);
-           denom = sqrt(df*pi)*gamma(df/2);
+           denom = s*sqrt(df*pi)*gamma(df/2);
        
-           l = n*log(numer/denom) -a * sum(log(1 + adjusted_residuals));
+           l = n*log(numer/denom) - a*sum(log(1 + adjusted_residuals));
        end
            
        % Find the sigma that maximizes the Log Liklihood function given a B
@@ -67,7 +67,6 @@ classdef student < handle
        end
        
        function ci = confidenceIntervals(stats, X, alpha, n)
-           
            if nargin == 2 
                alpha = .05;
                n = 100;
