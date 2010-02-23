@@ -49,7 +49,7 @@ classdef ols < handle
            m = length(stats.beta);  % number of covariates
            n = length(stats.r);  % number of observations
            
-           if(nargin == 2)
+           if(nargin == 1)
                weights = ones(n,1);
            end
            
@@ -63,7 +63,7 @@ classdef ols < handle
            m = length(stats.beta);  % number of covariates
            n = length(stats.r);  % number of observations
            
-           if(nargin == 2)
+           if(nargin == 1)
                weights = ones(n,1);
            end
            
