@@ -1,19 +1,18 @@
 classdef student < handle
    methods (Static)     
        % Solve for the gradient vector
-       function gr = gradient(X,Y,B,sigma,df)
+       function gr = gradient(y,X,B,sigma,df)
           [n,m] = size(X);
-          r = Y - X*B;
+          r = y - X*B;
           
           z = X;
           
-          w = r ./ (sigma^2 * df + r'*r);
+          w = r ./ (sigma^2 * df + r .^ 2);
           for i=1:m
             z(:,i) = z(:,i) .* w;
           end
           
           sder = (-n + (df+1)*sum(r .* w)) / sigma;
-          
           gr = [(df+1)*sum(z,1) sder];
        end
        
@@ -30,15 +29,15 @@ classdef student < handle
        end
            
        % Find the sigma that maximizes the Log Liklihood function given a B
-       function [l, g] = solveLLH(X,Y,B,df)
+       function [l, g] = solveLLH(y,X,B,df)
            
            beta = B(1:end-1);
            sigma = abs(B(end));
            
-           r = Y - X*beta;
+           r = y - X*beta;
            
            l = -student.LLH(r, sigma, df);
-           g = -student.gradient(X, Y, beta, sigma, df);
+           g = -student.gradient(y, X, beta, sigma, df);
        end
 
        % X should contain the intercept vector of 1s
@@ -51,7 +50,7 @@ classdef student < handle
            
            bInit = [bInit; sqrt(mean(r .^ 2))];
 
-           fHandle = @(b) student.solveLLH(X1,y,b,df);
+           fHandle = @(b) student.solveLLH(y,X1,b,df);
            
            options = optimset('MaxFunEvals', 10000, 'TolX', 1e-15, ...
                               'TolFun', 1e-15, 'GradObj', 'on', ...
@@ -75,7 +74,7 @@ classdef student < handle
            end
            
            m = length(stats.beta);
-           X1 = [ones(size(X,1),1) X];
+           X1 = [ones(length(X),1) X];
        
            bSim = zeros(m, n);
            
