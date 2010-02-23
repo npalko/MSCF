@@ -4,6 +4,7 @@ function stats = glm2regstatsAdapter(glm)
     
     
     stats.beta = glm.beta;
+    stats.r = glm.resid;
     
     stats.tstat.beta = glm.beta;
     stats.tstat.se = glm.se;
