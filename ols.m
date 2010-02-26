@@ -119,8 +119,62 @@ classdef ols < handle
            
            ci = [betaHat-d betaHat+d];
        end 
+       function plotConfidenceIntervals(y, X, alpha, filename)
+           % Draw scatter, regression line, and upper/lower bands
+           % With thanks to Nicholas Palko for help on the following lines to get the 
+           % appropriate bands for the Wald test in matlab
+           
+           [n,m] = size(X);
+           if m ~= 1
+               error('To plot confidence intervals, X must be a nx1 vector');
+           end
+           
+           if nargin == 2
+                alpha = 0.05;
+                filename = 'Confidence Bands';
+           elseif nargin == 3
+                filename = 'Confidence Bands';
+           end
+           
+           stats = regstats(y, X);
+           
+           xbar = mean(X);
+           st = sqrt(sum(stats.r .^ 2) / (n-2));
+           Sxx = sum((X - xbar) .^ 2);
+           F = icdf('F', 1-alpha, 2, n-2);
+           se = @(xi) st * sqrt(1/n + ((xi-xbar)^2)/Sxx);
+           
+           band_f = @(xi) stats.beta(1) + stats.beta(2)*xi + [1 -1] * se(xi)*sqrt(2*F);
+
+           xLim = [min(X) max(X)];
+           [xRegress yRegress] = fplot(@(x) stats.beta(1) + stats.beta(2) * x, xLim);
+
+           f = figure();
+           line(X,y,'Parent',gca(),'Marker','.','Line','None');
+           line(xRegress, yRegress, 'Parent', gca(), 'Color', 'red');
+
+           [xBand, yBand] = fplot(band_f, xLim);
+           line(xBand, yBand, 'Parent', gca(), 'Color', 'green');
+
+           title('Confidence Bands for Regression Line');
+           
+           saveas(f, filename, 'pdf');
+       end
    end
    methods (Static) % diagnostics
+       function w = waldTest(stats, C, c)
+           % The Wald test statistic 
+           diff = C * stats.beta - c; 
+           Vdiff = C * stats.covb * C; 
+           W = diff' * (Vdiff \ diff);
+
+           % The rejection region 
+           df = size(C,1);
+           pval = fpdf(W/2, df, n-2);
+           
+           w.waldstat = W;
+           w.pvalue = pval;
+       end
        function ms = modelSelection(reducedModelStats, fullModelStats)
            % model1: reduced model
            % model2: full model
@@ -133,15 +187,58 @@ classdef ols < handle
            ms.fstat = ((RSS1-RSS2)/(df1-df2)) * (df2/RSS2);
            ms.pvalue = 1 - fcdf(ms.fstat, df1-df2, df2);
        end
-       function diagnose()
+       function dw = diagnoseResiduals(stats, X, filename)
+           [n,m] = size(X);
+           residuals = stats.r;
+           y_estimate = [ones(n,1) X]*stats.beta;
 
-           % Durbin-Watson statistic
-           % Check for the violation of any of the following assumptions
-           %  1. linearity
-           %  2. homoscedasticity
-           %  3. non-normality
-           %  4. independence of errors
+           [c_ww,lags] = xcorr(residuals,'coeff');
 
+           % Check residuals
+           f = figure();  
+           
+           total_plots = 6+m;
+           ns = ceil(sqrt(total_plots)); %nearest square
+                      
+           subplot(ns,ns,1), hist(residuals);          %check normality
+           title('Histogram (normality)');
+           subplot(ns,ns,2), qqplot(residuals);        %check normality
+           title('QQ-Plot (normality)');
+           subplot(ns,ns,3), boxplot(residuals);       %check normality
+           title('Box-Plot');
+           subplot(ns,ns,4), line(y_estimate, residuals, 'Marker', '.', 'Line', 'None');  %check non-linearity 
+           title('Residuals vs y-hat (non-linearity)');
+           subplot(ns,ns,5), plot(residuals);                    %check homoscedasticity
+           title('Homoscedasticity Check');
+           subplot(ns,ns,6), stem(lags, c_ww);            %check independence
+           title('Autocorrelation (independence)');
+
+           for i = 1:m
+               subplot(ns,ns,6+i), line(residuals, X(:,i), 'Marker', '.', 'Line', 'None');             %check non-linearity 
+               switch mod(i,10)
+                   case 1
+                        t = sprintf('Residuals vs %dst covariate (non-linearity)', i);
+                   case 2
+                        t = sprintf('Residuals vs %dnd covariate (non-linearity)', i);
+                   case 3
+                        t = sprintf('Residuals vs %drd covariate (non-linearity)', i);
+                   otherwise
+                        t = sprintf('Residuals vs %dth covariate (non-linearity)', i);
+               end
+               
+               % check special cases 11, 12, 13
+               if i == 11 || i == 12 || i == 13
+                   t = sprintf('Residuals vs %dth covariate (non-linearity)', i);
+               end
+               title(t);
+           end
+
+           saveas(f, filename, 'pdf');
+           
+           [p,ds] = dwtest(residuals, [ones(n,1) X]);
+           
+           dw.pvalue = p;
+           dw.dwstate = ds;
        end 
    end
 end
