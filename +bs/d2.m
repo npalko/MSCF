@@ -1,4 +1,5 @@
-function d2 = d2(S, K, t, vol, r, T)
+function d2 = d2(S, K, t, vol, r, T, q)
 
-    d2 = bs.d1(S,K,t,vol,r,T) - vol*sqrt(T-t);
+    if nargin == 6, q = 0; end
+    d2 = bs.d1(S,K,t,vol,r,T,q) - vol*sqrt(T-t);
 end

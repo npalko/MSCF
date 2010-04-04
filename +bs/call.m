@@ -10,11 +10,14 @@ classdef call < handle
         end
     end
     methods (Static)
-        function C = price(S, K, t, vol, r, T)
+        function C = price(S, K, t, vol, r, T, q)
             
-            d1 = bs.d1(S, K, t, vol, r, T);
-            d2 = bs.d2(S, K, t, vol, r, T);
-            C = S*normcdf(d1) - K*exp(-r*(T-t))*normcdf(d2);
+            if nargin == 6, q = 0; end
+
+            F = bs.F(S, t, r, T, q);
+            d1 = bs.d1(S, K, t, vol, r, T, q);
+            d2 = bs.d2(S, K, t, vol, r, T, q);
+            C = exp(-r*(T-t))*(F*normcdf(d1) - K*normcdf(d2));
         end
         function charm = charm(S, K, t, vol, r, T)
         end
