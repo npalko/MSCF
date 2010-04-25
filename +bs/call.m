@@ -18,11 +18,11 @@ classdef call < handle
             d2 = bs.d2(S, K, t, vol, r, T, q);            
             C = S*exp(-q*(T-t))*normcdf(d1) - K*exp(-r*(T-t))*normcdf(d2);
         end
-        function charm = charm(S, K, t, vol, r, T)
+        function charm = charm(S, K, t, vol, r, T, q)
         end
-        function delta = delta(S, K, t, vol, r, T)
+        function delta = delta(S, K, t, vol, r, T, q)
             
-            d1 = bs.d1(S, K, t, vol, r, T);
+            d1 = bs.d1(S, K, t, vol, r, T, q);
             delta = normcdf(d1);
         end
         function gamma = gamma(S, K, t, vol, r, T)
