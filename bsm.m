@@ -21,20 +21,22 @@ classdef bsm
       [t r q] = optargs{:};
     end
     function f = f(x, T, t, r, q)
-      f = x.*exp(-(r-q).*(T-t));
+      f = x.*exp((r-q).*(T-t));
     end
     function dplus = dplus(x, K, sigma, T, t, r, q)
       f = bsm.f(x, T, t, r, q);
       dplus = (log(f./K) + (sigma.^2)/2*(T-t))./(sigma.*sqrt(T-t));
     end
     function dminus = dminus(x, K, sigma, T, t, r, q)
-      f = bsm.f(x, T, t, r, q);
-      dminus = (log(f./K) - (sigma.^2)/2*(T-t))./(sigma.*sqrt(T-t));
+      dminus = bsm.dplus(x, K, sigma, T, t, r, q) - sigma.*sqrt(T-t);
     end
     function price = price(x, K, sigma, T, t, r, q)
-        price = exp(-r*(T-t))*( ...
-                bsm.f(x, T, t, r, q)*bsm.dplus(x, K, sigma, T, t, r, q) - ...
-                K*bsm.dminus(x, K, sigma, T, t, r, q));
+        f = bsm.f(x, T, t, r, q);
+        d1 = bsm.dplus(x, K, sigma, T, t, r, q);
+        d2 = bsm.dminus(x, K, sigma, T, t, r, q);
+        nd1 = normcdf(d1, 0, 1);
+        nd2 = normcdf(d2, 0, 1);
+        price = exp(-r*(T-t))*(f.*nd1 - K.*nd2);
     end
   end
   methods (Static)
@@ -68,7 +70,7 @@ classdef bsm
   methods (Static)
       function ivol = ivol(v, x, K, T, t, r, q)
           objective = @(sigma)(v - bsm.price(x, K, sigma, T, t, r, q))^2;
-          ivol = fsolve(objective, 0.15);
+          ivol = fminunc(objective, 0.15);
       end
   end
 end
