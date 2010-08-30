@@ -33,8 +33,8 @@ classdef bsm
     end
     function price = price(x, K, sigma, T, t, r, q)
         price = exp(-r*(T-t))*( ...
-                f(x, T, t, r, q)*dplus(x, K, sigma, T, t, r, q) - ...
-                K*dminus(x, K, sigma, T, t, r, q));
+                bsm.f(x, T, t, r, q)*bsm.dplus(x, K, sigma, T, t, r, q) - ...
+                K*bsm.dminus(x, K, sigma, T, t, r, q));
     end
   end
   methods (Static)
@@ -67,7 +67,7 @@ classdef bsm
   end
   methods (Static)
       function ivol = ivol(v, x, K, T, t, r, q)
-          objective = @(sigma)(v - price(x, K, sigma, T, t, r, q))^2;
+          objective = @(sigma)(v - bsm.price(x, K, sigma, T, t, r, q))^2;
           ivol = fsolve(objective, 0.15);
       end
   end
