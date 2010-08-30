@@ -31,6 +31,11 @@ classdef bsm
       f = bsm.f(x, T, t, r, q);
       dminus = (log(f./K) - (sigma.^2)/2*(T-t))./(sigma.*sqrt(T-t));
     end
+    function price = price(x, K, sigma, T, t, r, q)
+        price = exp(-r*(T-t))*( ...
+                f(x, T, t, r, q)*dplus(x, K, sigma, T, t, r, q) - ...
+                K*dminus(x, K, sigma, T, t, r, q));
+    end
   end
   methods (Static)
     function delta = delta(phi, x, K, sigma, T, varargin)
@@ -59,5 +64,11 @@ classdef bsm
       varianceVega = x .* exp(-q.*(T-t)) .* sqrt(T-t)./(2.*sigma) .* ...
         normpdf(dplus);
     end
+  end
+  methods (Static)
+      function ivol = ivol(v, x, K, T, t, r, q)
+          @objective(sigma) = (v - price(x, K, sigma, T, t, r, q))**2
+          ivol = fsolve(objective, 0.15) %some arbitrary initial guess
+      end
   end
 end
