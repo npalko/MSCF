@@ -67,7 +67,7 @@ classdef bsm
   end
   methods (Static)
       function ivol = ivol(v, x, K, T, t, r, q)
-          objective = @(sigma)(v - price(x, K, sigma, T, t, r, q))**2;
+          objective = @(sigma)(v - price(x, K, sigma, T, t, r, q))^2;
           ivol = fsolve(objective, 0.15);
       end
   end
