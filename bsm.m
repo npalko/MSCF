@@ -72,5 +72,9 @@ classdef bsm
           objective = @(sigma)(v - bsm.price(x, K, sigma, T, t, r, q))^2;
           ivol = fminunc(objective, 0.15);
       end
+      
+      function m = moneyness(x, K, sigma, T, t, r, q)
+          m = (log(x/K) + r*(T-t)) / (sigma*sqrt(T-t));
+      end
   end
 end
