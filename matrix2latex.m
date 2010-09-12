@@ -1,4 +1,4 @@
-function matrix2latex(matrix, filename, varargin)
+function matrix2latex(matrix, filename, alignment, varargin)
 
 % function: matrix2latex(...)
 % Author:   M. Koehler
@@ -42,15 +42,12 @@ function matrix2latex(matrix, filename, varargin)
 
     rowLabels = [];
     colLabels = [];
-    alignment = 'l';
     format = [];
     textsize = [];
-    if (rem(nargin,2) == 1 || nargin < 2)
-        error('matrix2latex: ', 'Incorrect number of arguments to %s.', mfilename);
-    end
 
-    okargs = {'rowlabels','columnlabels', 'alignment', 'format', 'size'};
-    for j=1:2:(nargin-2)
+
+    okargs = {'rowlabels','columnlabels', 'format', 'size'};
+    for j=1:2:(nargin-3)
         pname = varargin{j};
         pval = varargin{j+1};
         k = strmatch(lower(pname), okargs);
@@ -71,20 +68,7 @@ function matrix2latex(matrix, filename, varargin)
                         colLabels = cellstr(num2str(colLabels(:)));
                     end
                 case 3  % alignment
-                    alignment = lower(pval);
-                    if alignment == 'right'
-                        alignment = 'r';
-                    end
-                    if alignment == 'left'
-                        alignment = 'l';
-                    end
-                    if alignment == 'center'
-                        alignment = 'c';
-                    end
-                    if alignment ~= 'l' && alignment ~= 'c' && alignment ~= 'r'
-                        alignment = 'l';
-                        warning('matrix2latex: ', 'Unkown alignment. (Set it to \''left\''.)');
-                    end
+
                 case 4  % format
                     format = lower(pval);
                 case 5  % format
@@ -116,14 +100,8 @@ function matrix2latex(matrix, filename, varargin)
     end
 
     fprintf(fid, '\\begin{tabular}{|');
-
-    if(~isempty(rowLabels))
-        fprintf(fid, 'l|');
-    end
-    for i=1:width
-        fprintf(fid, '%c|', alignment);
-    end
-    fprintf(fid, '}\r\n');
+    fprintf(fid, alignment);
+    fprintf(fid, '|}\r\n');
     
     fprintf(fid, '\\hline\r\n');
     
