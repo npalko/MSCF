@@ -99,10 +99,7 @@ function matrix2latex(matrix, filename, alignment, varargin)
         fprintf(fid, '\\begin{%s}', textsize);
     end
 
-    fprintf(fid, '\\begin{tabular}{|');
-    fprintf(fid, alignment);
-    fprintf(fid, '|}\r\n');
-    
+    fprintf(fid, '\\begin{tabular}{%s}\r\n', alignment);
     fprintf(fid, '\\hline\r\n');
     
     if(~isempty(colLabels))
