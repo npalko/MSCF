@@ -70,7 +70,8 @@ classdef bsm
   methods (Static)
       function ivol = ivol(v, x, K, T, t, r, q)
           objective = @(sigma)(v - bsm.price(x, K, sigma, T, t, r, q))^2;
-          ivol = fminunc(objective, 0.15);
+          options = optimset('Display', 'off', 'LargeScale', 'off');
+          ivol = fminunc(objective, 0.15, options);
       end
       
       function m = moneyness(x, K, sigma, T, t, r, q)
