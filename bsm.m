@@ -30,20 +30,19 @@ classdef bsm
     function dminus = dminus(x, K, sigma, T, t, r, q)
       dminus = bsm.dplus(x, K, sigma, T, t, r, q) - sigma.*sqrt(T-t);
     end
-    function price = price(x, K, sigma, T, t, r, q)
-        f = bsm.f(x, T, t, r, q);
-        d1 = bsm.dplus(x, K, sigma, T, t, r, q);
-        d2 = bsm.dminus(x, K, sigma, T, t, r, q);
-        nd1 = normcdf(d1, 0, 1);
-        nd2 = normcdf(d2, 0, 1);
-        price = exp(-r*(T-t))*(f.*nd1 - K.*nd2);
-    end
   end
   methods (Static)
-    function delta = delta(phi, x, K, sigma, T, varargin)
+    function price = price(phi, x, K, sigma, T, varargin)
+      [t r q] = bsm.optionalParameter(varargin);
+      f = x.*exp((r-q).*(T-t));
+      dplus = bsm.dplus(x, K, sigma, T, t, r, q);
+      dminus = bsm.dminus(x, K, sigma, T, t, r, q);
+      price = phi .*exp(-r.*(T-t)).*(f.*normcdf(phi.*dplus)-K.*normcdf(phi.*dminus));
+    end
+    function delta = forwardDelta(phi, x, K, sigma, T, varargin)
       [t r q] = bsm.optionalParameter(varargin);
       dplus = bsm.dplus(x, K, sigma, T, t, r, q);
-      delta = phi .* exp(-q.*(T-t)) .* normcdf(phi.*dplus);
+      delta = phi .* normcdf(phi.*dplus);
     end
     function gamma = gamma(x, K, sigma, T, varargin)
       [t r q] = bsm.optionalParameter(varargin);
@@ -69,7 +68,7 @@ classdef bsm
   end
   methods (Static)
       function ivol = ivol(v, x, K, T, t, r, q)
-          objective = @(sigma)(v - bsm.price(x, K, sigma, T, t, r, q))^2;
+          objective = @(sigma)(v - bsm.price(1, x, K, sigma, T, t, r, q))^2;
           options = optimset('Display', 'off', 'LargeScale', 'off');
           ivol = fminunc(objective, 0.15, options);
       end
