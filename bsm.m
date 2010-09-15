@@ -34,10 +34,11 @@ classdef bsm
   methods (Static)
     function price = price(phi, x, K, sigma, T, varargin)
       [t r q] = bsm.optionalParameter(varargin);
-      f = x.*exp((r-q).*(T-t));
+      f = bsm.f(x, T, t, r, q);
       dplus = bsm.dplus(x, K, sigma, T, t, r, q);
       dminus = bsm.dminus(x, K, sigma, T, t, r, q);
-      price = phi .*exp(-r.*(T-t)).*(f.*normcdf(phi.*dplus)-K.*normcdf(phi.*dminus));
+      price = phi .* exp(-r.*(T-t)) .* (f .* normcdf(phi.*dplus) - ...
+        K.*normcdf(phi.*dminus));
     end
     function delta = forwardDelta(phi, x, K, sigma, T, varargin)
       [t r q] = bsm.optionalParameter(varargin);
@@ -67,14 +68,15 @@ classdef bsm
     end
   end
   methods (Static)
-      function ivol = ivol(v, x, K, T, t, r, q)
-          objective = @(sigma)(v - bsm.price(1, x, K, sigma, T, t, r, q))^2;
-          options = optimset('Display', 'off', 'LargeScale', 'off');
-          ivol = fminunc(objective, 0.15, options);
-      end
-      
-      function m = moneyness(x, K, sigma, T, t, r, q)
-          m = (log(x/K) + r*(T-t)) / (sigma*sqrt(T-t));
-      end
+    function ivol = ivol(phi, v, x, K, T, varargin)
+      [t r q] = bsm.optionalParameter(varargin);
+      objective = @(sigma)(v - bsm.price(phi, x, K, sigma, T, t, r, q))^2;
+      options = optimset('Display', 'off', 'LargeScale', 'off');
+      ivol = fminunc(objective, 0.15, options);
+    end
+    function m = moneyness(x, K, sigma, T, varargin)
+      [t r] = bsm.optionalParameter(varargin);
+      m = (log(x/K) + r*(T-t)) / (sigma*sqrt(T-t));
+    end
   end
 end
