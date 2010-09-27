@@ -72,7 +72,7 @@ classdef bsm
       [t r q] = bsm.optionalParameter(varargin);
       objective = @(sigma)(v - bsm.price(phi, x, K, sigma, T, t, r, q))^2;
       options = optimset('Display', 'off', 'LargeScale', 'off');
-      ivol = fminunc(objective, 0.15, options);
+      ivol = fminsearch(objective, 0.1, options);
     end
     function m = moneyness(x, K, sigma, T, varargin)
       [t r] = bsm.optionalParameter(varargin);
