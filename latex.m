@@ -1,3 +1,17 @@
+%{
+  
+  data = cell(20,3);
+  for i=1:numel(data)
+    data{i} = sprintf('%.4f', randn());
+  end
+  lt = latex();
+  lt.setHeader({'Foo','Fee','Fum'});
+  lt.setAlign('|r|r|r|');
+  lt.write('example.tex', data);
+  
+  
+
+%}
 classdef latex < handle
   properties (Access=private)
     f
@@ -6,13 +20,14 @@ classdef latex < handle
     useRowLine = false
   end
   methods 
-    function this = latex2()
+    function this = latex()
     end
     function delete(this)
       try
         fclose(this.f);
       catch me
-        if ~strcmp(me.identifier,'MATLAB:FileIO:InvalidFid')
+        if ~any(strcmp(me.identifier, ...
+            {'MATLAB:FileIO:InvalidFid','MATLAB:badfid_mx'}))
           rethrow(me);
         end
       end
