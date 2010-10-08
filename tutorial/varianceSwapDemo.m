@@ -6,13 +6,14 @@ function varianceSwapDemo(K)
   f = @(x) bsm.varianceVega(x, K, .2, 1);
   g = @(x) bsm.gamma(x, K, .2, 1);
   
-  [x y] = fplot(g, [20 180]);
+  [x y] = fplot(f, [20 180]);
   
-  figure();
-  plot(x,y);
+  %figure();
+  %plot(x,y);
   
-  inversePortfolio = y.^2 * inverseWeight';
-  equalPortfolio = y.^2 * equalWeight';
+  % as we calculate vega proportional to the underlying stock^2
+  inversePortfolio = y * inverseWeight';
+  equalPortfolio = y * equalWeight';
   
   figure();
   plot(x, [inversePortfolio equalPortfolio]);
