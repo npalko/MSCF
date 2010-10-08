@@ -5,5 +5,5 @@ function m = movingAverage(x, n, noDataValue)
   end
 
   m = filter(ones(1,n)/n,1,x);
-  m(1:(n-1))=noDataValue;
+  m(1:(n-1)) = noDataValue;
 end
