@@ -1,8 +1,8 @@
-function h = publicationfigure(varargin)
+function h = publicationfigure(width)
 
   h = figure();
   
-  width = 4.00;
+  %width = 4.00;
   units = 'inches';
   
   % Resize to specified width
