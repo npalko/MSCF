@@ -1,14 +1,13 @@
-function price = bondprice(face, yield, maturity, coupon)
+function price = bondprice(face, yield, maturity, coupon, nCompound)
 %{
 Typical usage:
 
-    price = bondprice(face, yield, maturity, coupon);
+    price = bondprice(face, yield, maturity, coupon, nCompound);
     price = bondprice(100,.10,8,.05);
     fsolve(@(y) 119.23 - bondprice(100,y,8,.05));
      
 %}
 
-    nCompound = 2;  % number of compounds per year
     nCashflows = nCompound * maturity;
     
     couponPayment = coupon/nCompound*face;
