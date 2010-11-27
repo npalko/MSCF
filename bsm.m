@@ -54,12 +54,9 @@ classdef bsm
       [t r q] = bsm.optionalParameter(varargin);
       dplus = bsm.dplus(x, K, sigma, T, t, r, q);
       dminus = bsm.dminus(x, K, sigma, T, t, r, q);
-      
       theta = -exp(-q.*(T-t)).*x.*normpdf(dplus).*sigma./(2*sqrt(T-t)) ...
         -phi.*r.*K.*exp(-r*(T-t)).*normcdf(phi.*dminus) ...
         +phi*q*x*exp(-q*(T-t))*normcdf(phi*dplus);
-
-      
     end
     function vega = vega(x, K, sigma, T, varargin)
       [t r q] = bsm.optionalParameter(varargin);
